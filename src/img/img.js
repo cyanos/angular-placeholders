@@ -29,7 +29,7 @@ angular.module( 'placeholders.img', [] )
 .directive( 'phImg', function () {
   return {
     restrict: 'A',
-    scope: { dimensions: '@phImg' },
+    scope: { dimensions: '@phImg',fill_color:'@fillColor' },
     link: function( scope, element, attr ) {
       // A reference to a canvas that we can reuse
       var canvas;
@@ -45,7 +45,17 @@ angular.module( 'placeholders.img', [] )
         fill_color: '#EEEEEE',
         text_color: '#AAAAAA'
       };
-
+      scope.$watch('fill_color', function () {
+         if( ! angular.isDefined( scope.fill_color ) ) {
+            return;
+        }
+        dataUrl = drawImage();
+         if ( element.prop( "tagName" ) === "IMG" ) {
+          element.prop( 'src', dataUrl );
+        } else {
+          element.css( 'background-image', 'url("' + dataUrl + '")' );      
+        }
+      });
       /**
        * When the provided dimensions change, re-pull the width and height and
        * then redraw the image.
@@ -116,7 +126,7 @@ angular.module( 'placeholders.img', [] )
         // Draw the placeholder image square.
         // TODO: support other shapes
         // TODO: support configurable colors
-        context.fillStyle = config.fill_color;
+        context.fillStyle = scope.fill_color||config.fill_color;
         context.fillRect( 0, 0, scope.size.w, scope.size.h );
 
         // Add the dimension text.
