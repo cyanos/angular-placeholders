@@ -29,7 +29,7 @@ angular.module( 'placeholders.img', [] )
 .directive( 'phImg', function () {
   return {
     restrict: 'A',
-    scope: { dimensions: '@phImg' },
+    scope: { dimensions: '@phImg', text: '@phText' },
     link: function( scope, element, attr ) {
       // A reference to a canvas that we can reuse
       var canvas;
@@ -123,7 +123,7 @@ angular.module( 'placeholders.img', [] )
         // TODO: support configurable font
         // FIXME: ensure text will fit and resize if it doesn't
         text_size = getTextSize();
-        text = scope.dimensions;
+        text = scope.text || scope.dimensions;
         context.fillStyle = config.text_color;
         context.textAlign = 'center';
         context.textBaseline = 'middle';
@@ -136,7 +136,7 @@ angular.module( 'placeholders.img', [] )
         }
 
         // Finally, draw the text in its calculated position.
-        context.fillText( scope.dimensions, scope.size.w / 2, scope.size.h / 2 );
+        context.fillText( text, scope.size.w / 2, scope.size.h / 2 );
 
         // Get the data URL and return it.
         return canvas.toDataURL("image/png");
