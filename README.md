@@ -11,7 +11,9 @@ angular-placeholders includes a `phTxt` directive for the insertion of
 accepts two optional attributes: `num-sentences` and `num-paragraphs`. If
 `num-sentences` is provided, the body of the element will be replaced with the
 specified number of sentences. `num-paragraphs` will replace the body of the
-element with the specified number of `<p>` tags containing random sentences. 
+element with the specified number of `<p>` tags containing random sentences.
+
+Alternatively, `num-words` will replace the body of the element with the specified number of words. *Currently, the usage of `num-words` in conjunction with `num-sentences` or `num-paragraphs` is NOT supported*.
 
 The default behavior is a random number of paragraphs.
 

@@ -178,33 +178,33 @@ angular.module( 'placeholders.txt', [] )
     "feugiat", "nibh", "sed", "pulvinar", "proin", "gravida", "hendrerit",
     "lectus", "a", "molestie", "gravida", "dictum"
   ];
-  
+
   function randomInt ( min, max ) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
-  
+
   return {
     createSentence: function ( sentenceLength ) {
       var wordIndex,
           sentence;
-      
-      // Determine how long the sentence should be. Do it randomly if one was not 
+
+      // Determine how long the sentence should be. Do it randomly if one was not
       // provided.
       sentenceLength = sentenceLength || randomInt( 5, 20 );
-      
+
       // Now we determine were we are going to start in the array randomly. We
       // are just going to take a slice of the array, so we have to ensure
       // whereever we start has enough places left in the array to accommodate
       // the random sentence length from above.
       wordIndex = randomInt(0, words.length - sentenceLength - 1);
-      
+
       // And pull out the words, join them together, separating words by spaces
-      // (duh), and removing any commas that may appear at the end of the 
+      // (duh), and removing any commas that may appear at the end of the
       // sentence. Finally, add a period.
       sentence = words.slice(wordIndex, wordIndex + sentenceLength)
             .join(' ')
             .replace(/\,$/g, '') + '.';
-            
+
       // Capitalize the first letter - it is a sentence, after all.
       sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
 
@@ -213,36 +213,36 @@ angular.module( 'placeholders.txt', [] )
     createSentences: function ( numSentences ) {
       var sentences = [],
           i = 0;
-      
-      // Determine how many sentences we should do. Do it randomly if one was not 
+
+      // Determine how many sentences we should do. Do it randomly if one was not
       // provided.
       numSentences = numSentences || randomInt( 3, 5 );
-      
+
       // For each paragraph, we should generate between 3 and 5 sentences.
       for ( i = 0; i < numSentences; i++ ) {
         sentences.push( this.createSentence() );
       }
-      
+
       // And then we just return the array of sentences, concatenated with spaces.
       return sentences.join( ' ' );
     },
     createParagraph: function ( numSentences ) {
       var sentences = this.createSentences( numSentences );
-      
+
       // Make the sentences into a paragraph and return.
       return "<p>" + sentences + "</p>";
     },
     createParagraphs: function ( numParagraphs, numSentences ) {
       var paragraphs = [],
           i = 0;
-      
+
       numParagraphs = numParagraphs || randomInt( 3, 7 );
-      
+
       // Create the number of paragraphs requested.
       for ( i = 0; i < numParagraphs; i++ ) {
         paragraphs.push( this.createParagraph( numSentences ) );
       }
-      
+
       // Return the paragraphs, concatenated with newlines.
       return paragraphs.join( '\n' );
     }
@@ -254,7 +254,8 @@ angular.module( 'placeholders.txt', [] )
     restrict: "EA",
     controller: [ '$scope', '$element', '$attrs', function ( $scope, $element, $attrs ) {
       var numSentences,
-          numParagraphs;
+          numParagraphs,
+          numWords;
 
       // Gets the number of paragraphs or sentences from the service and
       // populates the DOM node.
@@ -268,15 +269,20 @@ angular.module( 'placeholders.txt', [] )
           contents = TextGeneratorService.createSentences( numSentences );
         }
 
+        if ( numWords && !numSentences ) {
+          contents = TextGeneratorService.createSentence( numWords );
+        }
+
         $element.html( contents );
       }
 
       $attrs.$observe( 'phTxt', function ( val ) {
-        var p_match, s_match;
+        var p_match, s_match, w_match;
 
         // Pull out the matches.
         p_match = val.match( /(\d+)p/ );
         s_match = val.match( /(\d+)s/ );
+        w_match = val.match( /(\d+)w/ );
 
         // If there was a match, store the value. If there wasn't, we set the
         // value to false to ensure no old value is kept around.
@@ -293,10 +299,17 @@ angular.module( 'placeholders.txt', [] )
           numSentences = false;
         }
 
+        // Same for words...
+        if ( w_match !== null ) {
+          numWords = parseInt( w_match[1], 10 );
+        } else {
+          numWords = false;
+        }
+
         // And populate everything.
         populate();
       });
-      
+
       // If nothing was passed, the $observe will never run, so we need to trigger
       // the `populate()` manually.
       if ( ! $attrs.phTxt ) {
