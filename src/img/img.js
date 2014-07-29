@@ -29,7 +29,7 @@ angular.module( 'placeholders.img', [] )
 .directive( 'phImg', function () {
   return {
     restrict: 'A',
-    scope: { dimensions: '@phImg', text: '@phText' },
+    scope: { dimensions: '@phImg', text: '@phText', fill_color: '@fillColor' },
     link: function( scope, element, attr ) {
       // A reference to a canvas that we can reuse
       var canvas;
@@ -45,7 +45,17 @@ angular.module( 'placeholders.img', [] )
         fill_color: '#EEEEEE',
         text_color: '#AAAAAA'
       };
-
+      scope.$watch('fill_color', function () {
+         if( ! angular.isDefined( scope.fill_color ) ) {
+            return;
+        }
+        dataUrl = drawImage();
+         if ( element.prop( "tagName" ) === "IMG" ) {
+          element.prop( 'src', dataUrl );
+        } else {
+          element.css( 'background-image', 'url("' + dataUrl + '")' );
+        }
+      });
       /**
        * When the provided dimensions change, re-pull the width and height and
        * then redraw the image.
@@ -56,12 +66,12 @@ angular.module( 'placeholders.img', [] )
         }
         var matches = scope.dimensions.match( /^(\d+)x(\d+)$/ ),
             dataUrl;
-        
+
         if(  ! matches ) {
           console.error("Expected '000x000'. Got " + scope.dimensions);
           return;
         }
-        
+
         // Grab the provided dimensions.
         scope.size = { w: matches[1], h: matches[2] };
 
@@ -77,7 +87,7 @@ angular.module( 'placeholders.img', [] )
         if ( element.prop( "tagName" ) === "IMG" ) {
           element.prop( 'src', dataUrl );
         } else {
-          element.css( 'background-image', 'url("' + dataUrl + '")' );      
+          element.css( 'background-image', 'url("' + dataUrl + '")' );
         }
       });
 
@@ -102,7 +112,7 @@ angular.module( 'placeholders.img', [] )
         // Create a new canvas if we don't already have one. We reuse the canvas
         // when if gets redrawn so as not to be wasteful.
         canvas = canvas || document.createElement( 'canvas' );
-        
+
         // Obtain a 2d drawing context on which we can add the placeholder
         // image.
         var context = canvas.getContext( '2d' ),
@@ -116,7 +126,7 @@ angular.module( 'placeholders.img', [] )
         // Draw the placeholder image square.
         // TODO: support other shapes
         // TODO: support configurable colors
-        context.fillStyle = config.fill_color;
+        context.fillStyle = scope.fill_color||config.fill_color;
         context.fillRect( 0, 0, scope.size.w, scope.size.h );
 
         // Add the dimension text.
